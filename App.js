@@ -4,13 +4,18 @@ import {
     Text, 
     View,
     ScrollView,
-    TouchableOpacity
+    TouchableOpacity,
 } from 'react-native';
 
 import Config from './src/Config';
 import Header from './src/components/Header';
 import Footer from './src/components/Footer';
 
+/**
+ * App
+ *
+ * Root component for the application.
+ */
 export default class App extends React.Component {
 
     /**
@@ -29,6 +34,17 @@ export default class App extends React.Component {
     }
 
     /**
+     * cloneNotes
+     *
+     * Creates a shallow copy of the state notes array
+     *
+     * @return   @array  cloned notes array
+     */
+    cloneNotes() {
+        return [...this.state.notes];
+    }
+
+    /**
      * addNote
      *
      * Adds new note.
@@ -40,10 +56,13 @@ export default class App extends React.Component {
         if (this.state.note.length <= 0)
             return;
 
-        this.setState(prevState => ({
-            notes: [...prevState.notes, this.state.note],
+        const r = this.cloneNotes();
+        r.push(this.state.note);
+
+        this.setState({
+            notes: r,
             note: ''
-        }));
+        });
 
     }
 
@@ -56,8 +75,9 @@ export default class App extends React.Component {
      */
     removeNote(i) {
 
-        const r = [...this.state.notes];
+        const r = this.cloneNotes();
         r.splice(i, 1);
+
         this.setState({notes: r});
 
     }
