@@ -1,4 +1,4 @@
-# React Native Navigation Starter Template
+# React Native Todo Application
 
 A React Native Todo application.
 
