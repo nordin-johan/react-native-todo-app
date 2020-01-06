@@ -5,6 +5,7 @@ import {
     View,
     ScrollView,
     TouchableOpacity,
+    AsyncStorage
 } from 'react-native';
 
 import Config from './src/Config';
@@ -15,6 +16,7 @@ import Footer from './src/components/Footer';
  * App
  *
  * Root component for the application.
+ * Handles logic for adding and removing notes.
  */
 export default class App extends React.Component {
 
@@ -30,6 +32,47 @@ export default class App extends React.Component {
             notes: [],
             note: ''
         }
+
+    }
+
+    /**
+     * componentDidMount
+     *
+     * Load notes from asyncstorage if exists
+     */
+    async componentDidMount() {
+
+        const notes = await AsyncStorage.getItem('notes');
+        if (notes && notes.length > 0) {
+            this.setState({
+                notes: JSON.parse(notes)
+            })
+        }
+
+    }
+
+    /**
+     * updateAsyncStorage
+     *
+     * @array   notes   notes array to save in asyncstorage
+     *
+     * @return  promise
+     */
+    updateAsyncStorage(notes) {
+
+        return new Promise( async(resolve, reject) => {
+
+            try {
+
+                await AsyncStorage.removeItem('notes');
+                await AsyncStorage.setItem('notes', JSON.stringify(notes));
+                return resolve(true);
+
+            } catch(e) {
+                return reject(e);
+            }
+
+        });
 
     }
 
@@ -51,18 +94,31 @@ export default class App extends React.Component {
      *
      * @return  undefined
      */
-    addNote() {
+    async addNote() {
 
         if (this.state.note.length <= 0)
             return;
 
-        const r = this.cloneNotes();
-        r.push(this.state.note);
+        try {
 
-        this.setState({
-            notes: r,
-            note: ''
-        });
+            const notes = this.cloneNotes();
+            notes.push(this.state.note);
+
+            await this.updateAsyncStorage(notes);
+
+            this.setState({
+                notes: notes,
+                note: ''
+            });
+
+        }
+
+        catch(e) {
+
+            // notes could not be updated
+            alert(e);
+
+        }
 
     }
 
@@ -73,12 +129,24 @@ export default class App extends React.Component {
      *
      * @return  undefined
      */
-    removeNote(i) {
+    async removeNote(i) {
 
-        const r = this.cloneNotes();
-        r.splice(i, 1);
+        try {
 
-        this.setState({notes: r});
+            const notes = this.cloneNotes();
+            notes.splice(i, 1);
+
+            await this.updateAsyncStorage(notes);
+            this.setState({ notes: notes });
+
+        }
+
+        catch(e) {
+
+            // Note could not be deleted
+            alert(e);
+
+        }
 
     }
 
@@ -115,13 +183,11 @@ export default class App extends React.Component {
                     {this.renderNotes()}
                 </ScrollView>
 
-
                 <Footer
                     onChangeText={ (note) => this.setState({note})  }
                     inputValue={this.state.note}
                     onNoteAdd={ () => this.addNote() }
                 />
-
 
             </View>
         );
