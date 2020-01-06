@@ -1,6 +1,6 @@
 # React Native Todo Application
 
-A React Native Todo application.
+A React Native Todo application. All 'todos' are saved in AsyncStorage.
 
 ## Usage
 ```git clone https://github.com/nordin-johan/react-native-todo-app.git```
